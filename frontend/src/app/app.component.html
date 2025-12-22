@@ -1,24 +1,24 @@
 <mat-toolbar color="primary">
   <span class="logo" (click)="goHome()">Smart Event Planner</span>
-  
+
   <span class="spacer"></span>
-  
+
   <div class="nav-links" *ngIf="currentUser; else authLinks">
     <button mat-button routerLink="/events">Events</button>
-    
+
     <button mat-button routerLink="/bookings" *ngIf="isAttendee()">
       My Bookings
     </button>
-    
+
     <button mat-button routerLink="/organizer/dashboard" *ngIf="isOrganizer()">
       Dashboard
     </button>
-    
+
     <button mat-button [matMenuTriggerFor]="menu">
-      Mithun
+      {{ getUserDisplayName() }}
       <mat-icon>arrow_drop_down</mat-icon>
     </button>
-    
+
     <mat-menu #menu="matMenu">
       <button mat-menu-item (click)="logout()">
         <mat-icon>logout</mat-icon>
@@ -26,7 +26,7 @@
       </button>
     </mat-menu>
   </div>
-  
+
   <ng-template #authLinks>
     <div class="auth-links">
       <button mat-button routerLink="/login">Login</button>
