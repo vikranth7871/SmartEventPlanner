@@ -1,0 +1,44 @@
+<div class="user-bookings-container">
+  <h2>My Bookings</h2>
+  
+  <div class="bookings-list" *ngIf="bookings.length > 0; else noBookings">
+    <mat-card *ngFor="let booking of bookings" class="booking-card">
+      <mat-card-header>
+        <mat-card-title>{{ booking.event_name }}</mat-card-title>
+        <mat-card-subtitle>Booking #{{ booking.id }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="booking-info">
+          <p><strong>Venue:</strong> {{ booking.event_venue }}</p>
+          <p><strong>Event Date:</strong> {{ formatDate(booking.event_date!) }}</p>
+          <p><strong>Tickets:</strong> {{ booking.tickets_booked }}</p>
+          <p><strong>Total Paid:</strong> ${{ booking.total_price }}</p>
+          <p><strong>Booked On:</strong> {{ formatDate(booking.booking_time!) }}</p>
+        </div>
+      </mat-card-content>
+      
+      <mat-card-actions>
+        <button mat-raised-button color="primary" 
+                (click)="viewBookingDetails(booking.id!)">
+          View Details & QR Code
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <ng-template #noBookings>
+    <div class="no-bookings">
+      <mat-card>
+        <mat-card-content>
+          <p>You haven't made any bookings yet.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="browseEvents()">
+            Browse Events
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </ng-template>
+</div>

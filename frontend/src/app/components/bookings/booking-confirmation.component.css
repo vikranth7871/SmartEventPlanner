@@ -1,0 +1,43 @@
+.booking-confirmation-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.confirmation-card {
+  width: 100%;
+}
+.booking-details {
+  margin-bottom: 30px;
+}
+.booking-details p {
+  margin: 8px 0;
+}
+.qr-code-section {
+  text-align: center;
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+.qr-code {
+  margin: 20px 0;
+}
+.qr-code img {
+  max-width: 200px;
+  height: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: white;
+}
+.qr-instructions {
+  color: #666;
+  font-style: italic;
+  margin-top: 10px;
+}
+.loading, .error {
+  text-align: center;
+  padding: 40px;
+}
+mat-card-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}

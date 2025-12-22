@@ -1,0 +1,40 @@
+<mat-toolbar color="primary">
+  <span class="logo" (click)="goHome()">Smart Event Planner</span>
+  
+  <span class="spacer"></span>
+  
+  <div class="nav-links" *ngIf="currentUser; else authLinks">
+    <button mat-button routerLink="/events">Events</button>
+    
+    <button mat-button routerLink="/bookings" *ngIf="isAttendee()">
+      My Bookings
+    </button>
+    
+    <button mat-button routerLink="/organizer/dashboard" *ngIf="isOrganizer()">
+      Dashboard
+    </button>
+    
+    <button mat-button [matMenuTriggerFor]="menu">
+      Mithun
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </mat-menu>
+  </div>
+  
+  <ng-template #authLinks>
+    <div class="auth-links">
+      <button mat-button routerLink="/login">Login</button>
+      <button mat-raised-button routerLink="/register">Register</button>
+    </div>
+  </ng-template>
+</mat-toolbar>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>

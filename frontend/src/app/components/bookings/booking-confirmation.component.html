@@ -1,0 +1,55 @@
+<div class="booking-confirmation-container" *ngIf="booking">
+  <mat-card class="confirmation-card">
+    <mat-card-header>
+      <mat-card-title>Booking Confirmation</mat-card-title>
+      <mat-card-subtitle>Your tickets have been booked successfully!</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="booking-details">
+        <h3>Booking Details</h3>
+        <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
+        <p><strong>Event:</strong> {{ booking.event_name }}</p>
+        <p><strong>Venue:</strong> {{ booking.event_venue }}</p>
+        <p><strong>Date:</strong> {{ formatDate(booking.event_date!) }}</p>
+        <p><strong>Tickets:</strong> {{ booking.tickets_booked }}</p>
+        <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
+        <p><strong>Booking Time:</strong> {{ formatDate(booking.booking_time!) }}</p>
+      </div>
+
+      <div class="qr-code-section" *ngIf="booking.qr_code">
+        <h3>Entry QR Code</h3>
+        <div class="qr-code">
+          <img [src]="booking.qr_code" alt="QR Code for entry" />
+        </div>
+        <p class="qr-instructions">
+          Show this QR code at the event entrance for verification.
+        </p>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="viewMyBookings()">
+        View My Bookings
+      </button>
+      <button mat-button (click)="backToEvents()">
+        Browse More Events
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div class="loading" *ngIf="!booking && !error">
+  <p>Loading booking details...</p>
+</div>
+
+<div class="error" *ngIf="error">
+  <mat-card>
+    <mat-card-content>
+      <p>{{ error }}</p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button (click)="backToEvents()">Back to Events</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,0 +1,20 @@
+.logo {
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.nav-links, .auth-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.main-content {
+  min-height: calc(100vh - 64px);
+  background-color: #f5f5f5;
+}

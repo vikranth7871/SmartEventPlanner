@@ -1,0 +1,23 @@
+.user-bookings-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.bookings-list {
+  display: grid;
+  gap: 20px;
+}
+.booking-card {
+  width: 100%;
+}
+.booking-info p {
+  margin: 8px 0;
+}
+.no-bookings {
+  text-align: center;
+  margin-top: 40px;
+}
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}

@@ -1,0 +1,125 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h2>Organizer Dashboard</h2>
+    <button mat-raised-button color="primary" (click)="createEvent()">
+      Create New Event
+    </button>
+  </div>
+
+  <!-- Overall Analytics -->
+  <div class="analytics-section" *ngIf="organizerStats">
+    <h3>- Bookings & Analytics</h3>
+    <div class="stats-cards">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h4>Total Bookings</h4>
+          <p class="stat-number">{{ organizerStats.totalBookings || 0 }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h4>Tickets Sold</h4>
+          <p class="stat-number">{{ organizerStats.totalTickets || 0 }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h4>Total Revenue</h4>
+          <p class="stat-number">${{ organizerStats.totalRevenue || 0 }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="My Events">
+      <div class="tab-content">
+        <div class="events-grid" *ngIf="events.length > 0; else noEvents">
+          <mat-card *ngFor="let event of events" class="event-card">
+            <mat-card-header>
+              <mat-card-title>{{ event.name }}</mat-card-title>
+              <mat-card-subtitle>{{ event.category }}</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <p><strong>Venue:</strong> {{ event.venue }}</p>
+              <p><strong>Date:</strong> {{ formatDate(event.date_time) }}</p>
+              <p><strong>Capacity:</strong> {{ event.capacity }}</p>
+              <p><strong>Available:</strong> {{ event.available_tickets }}</p>
+              <p><strong>Price:</strong> ${{ event.ticket_price || 0 }}</p>
+            </mat-card-content>
+            
+            <mat-card-actions>
+              <button mat-button (click)="viewEventBookings(event.id!)">
+                View Bookings
+              </button>
+              <button mat-button (click)="editEvent(event.id!)">
+                Edit
+              </button>
+              <button mat-button color="warn" (click)="deleteEvent(event.id!, event.name)">
+                Delete
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+
+        <!-- Bookings Display -->
+        <div class="bookings-section" *ngIf="selectedEventBookings.length > 0">
+          <div class="bookings-header">
+            <h3>{{ selectedEventName }} - Bookings</h3>
+            <button mat-button (click)="clearBookingsView()">Close</button>
+          </div>
+          
+          <div class="stats-cards">
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <h4>Total Bookings</h4>
+                <p class="stat-number">{{ eventStats?.totalBookings || 0 }}</p>
+              </mat-card-content>
+            </mat-card>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <h4>Tickets Sold</h4>
+                <p class="stat-number">{{ eventStats?.totalTickets || 0 }}</p>
+              </mat-card-content>
+            </mat-card>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <h4>Revenue</h4>
+                <p class="stat-number">${{ eventStats?.totalRevenue || 0 }}</p>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <div class="bookings-list">
+            <h4>Booking Details</h4>
+            <mat-card *ngFor="let booking of selectedEventBookings" class="booking-item">
+              <mat-card-content>
+                <div class="booking-details">
+                  <p><strong>Booking #{{ booking.id }}</strong></p>
+                  <p>Attendee: {{ getAttendeeName(booking) }} ({{ getAttendeeEmail(booking) }})</p>
+                  <p>Tickets: {{ booking.tickets_booked }}</p>
+                  <p>Amount: ${{ booking.total_price }}</p>
+                  <p>Booked: {{ formatDate(booking.booking_time!) }}</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+
+        <ng-template #noEvents>
+          <div class="no-content">
+            <p>You haven't created any events yet.</p>
+            <button mat-raised-button color="primary" (click)="createEvent()">
+              Create Your First Event
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </mat-tab>
+
+
+  </mat-tab-group>
+</div>

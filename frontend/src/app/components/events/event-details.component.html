@@ -1,0 +1,63 @@
+<div class="event-details-container" *ngIf="event">
+  <mat-card class="event-card">
+    <mat-card-header>
+      <mat-card-title>{{ event.name }}</mat-card-title>
+      <mat-card-subtitle>{{ event.category }}</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="event-info">
+        <p><strong>Description:</strong> {{ event.description || 'No description available' }}</p>
+        <p><strong>Venue:</strong> {{ event.venue }}</p>
+        <p><strong>Date & Time:</strong> {{ formatDate(event.date_time) }}</p>
+        <p><strong>Total Capacity:</strong> {{ event.capacity }}</p>
+        <p><strong>Available Tickets:</strong> {{ event.available_tickets }}</p>
+        <p><strong>Ticket Price:</strong> ${{ event.ticket_price || 0 }}</p>
+      </div>
+
+      <div class="booking-section" *ngIf="canBook()">
+        <h3>Book Tickets</h3>
+        <form [formGroup]="bookingForm" (ngSubmit)="bookTickets()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Number of Tickets</mat-label>
+            <input matInput type="number" formControlName="tickets_booked" 
+                   [max]="event.available_tickets || 0" min="1">
+            <mat-error *ngIf="bookingForm.get('tickets_booked')?.hasError('required')">
+              Number of tickets is required
+            </mat-error>
+            <mat-error *ngIf="bookingForm.get('tickets_booked')?.hasError('min')">
+              Minimum 1 ticket required
+            </mat-error>
+            <mat-error *ngIf="bookingForm.get('tickets_booked')?.hasError('max')">
+              Cannot exceed available tickets
+            </mat-error>
+          </mat-form-field>
+
+          <div class="total-price" *ngIf="bookingForm.get('tickets_booked')?.value">
+            <p><strong>Total Price: ${{ calculateTotal() }}</strong></p>
+          </div>
+
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="bookingForm.invalid || isBooking" class="full-width">
+            {{ isBooking ? 'Booking...' : 'Book Tickets' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="no-booking" *ngIf="!canBook()">
+        <p *ngIf="!event.available_tickets" class="sold-out">This event is sold out!</p>
+        <p *ngIf="!isAttendee()" class="login-required">
+          Please <a (click)="goToLogin()">login as an attendee</a> to book tickets.
+        </p>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button mat-button (click)="goBack()">Back to Events</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div class="loading" *ngIf="!event">
+  <p>Loading event details...</p>
+</div>
