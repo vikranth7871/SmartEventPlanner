@@ -20,7 +20,18 @@ export const eventSchema = Joi.object({
   category: Joi.string().required(),
   capacity: Joi.number().integer().min(1).required(),
   ticket_price: Joi.number().min(0).default(0),
-  image_url: Joi.string().uri().optional()
+  image_url: Joi.string().uri().optional(),
+  has_seats: Joi.boolean().default(false),
+  seat_rows: Joi.when('has_seats', {
+    is: true,
+    then: Joi.number().integer().min(1).max(26).required(),
+    otherwise: Joi.optional()
+  }),
+  seat_cols: Joi.when('has_seats', {
+    is: true,
+    then: Joi.number().integer().min(1).max(50).required(),
+    otherwise: Joi.optional()
+  })
 });
 
 export const bookingSchema = Joi.object({
@@ -36,5 +47,8 @@ export const eventUpdateSchema = Joi.object({
   category: Joi.string().optional(),
   capacity: Joi.number().integer().min(1).optional(),
   ticket_price: Joi.number().min(0).optional(),
-  image_url: Joi.string().uri().optional()
+  image_url: Joi.string().uri().optional(),
+  has_seats: Joi.boolean().optional(),
+  seat_rows: Joi.number().integer().min(1).max(26).optional(),
+  seat_cols: Joi.number().integer().min(1).max(50).optional()
 });

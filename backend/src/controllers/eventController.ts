@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { EventModel } from '../models/Event';
+import { SeatModel } from '../models/Seat';
 import { eventSchema, eventUpdateSchema } from '../utils/validation';
 import { AuthRequest } from '../middleware/auth';
 
@@ -13,8 +14,18 @@ export class EventController {
 
       const eventData = { ...value, organizer_id: req.user!.id };
       const eventId = await EventModel.create(eventData);
+      
+      // Generate seats if seat-wise booking is enabled
+      if (eventData.has_seats && eventData.seat_rows && eventData.seat_cols) {
+        await SeatModel.generateSeats(
+          eventId, 
+          eventData.seat_rows, 
+          eventData.seat_cols, 
+          eventData.ticket_price || 0
+        );
+      }
+      
       const event = await EventModel.findById(eventId);
-
       res.status(201).json({ message: 'Event created successfully', event });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create event' });

@@ -18,6 +18,9 @@ export interface Event {
   image_url?: string;
   created_at?: Date;
   available_tickets?: number;
+  seat_rows?: number;
+  seat_cols?: number;
+  has_seats?: boolean;
 }
 
 export interface Booking {

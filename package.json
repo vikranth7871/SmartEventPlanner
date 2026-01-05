@@ -1,0 +1,14 @@
+{
+  "name": "smart-event-planner",
+  "version": "1.0.0",
+  "description": "Smart Event Planner Full Stack Application",
+  "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && ng serve",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

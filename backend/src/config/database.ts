@@ -3,11 +3,17 @@ import mysql from 'mysql2/promise';
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: 'vikranth@7871', // Direct password since env var not loading
-  database: process.env.DB_NAME || 'smart_event_planner'
+  password: process.env.DB_PASSWORD || 'vikranth@7871',
+  database: process.env.DB_NAME || 'smart_event_planner',
+  connectTimeout: 60000
 };
 
-export const pool = mysql.createPool(dbConfig);
+export const pool = mysql.createPool({
+  ...dbConfig,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
 export const initDatabase = async () => {
   try {
@@ -22,10 +28,11 @@ export const initDatabase = async () => {
     await tempConnection.execute(`CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`);
     await tempConnection.end();
     
-    // Now connect to the specific database
+    // Test pool connection
     const connection = await pool.getConnection();
+    console.log('Database connection established');
     
-    // Create Users table
+    // Create tables...
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,7 +44,6 @@ export const initDatabase = async () => {
       )
     `);
     
-    // Create Events table
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS events (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,7 +61,6 @@ export const initDatabase = async () => {
       )
     `);
     
-    // Create Bookings table
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS bookings (
         id INT AUTO_INCREMENT PRIMARY KEY,

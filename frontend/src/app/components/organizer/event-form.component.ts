@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EventService } from '../../services/event.service';
 import { Event } from '../../models/interfaces';
@@ -25,7 +26,8 @@ import { Event } from '../../models/interfaces';
     MatButtonModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatCheckboxModule
   ],
   template: `
     <div class="event-form-container">
@@ -91,14 +93,46 @@ import { Event } from '../../models/interfaces';
               <mat-form-field appearance="outline" class="half-width">
                 <mat-label>Time</mat-label>
                 <input matInput type="time" formControlName="time" required>
-                <mat-error *ngIf="eventForm.get('time')?.hasError('required')">
+                <mat-error
+                  *ngIf="
+                    eventForm.get('time')?.hasError('required') &&
+                    (eventForm.get('time')?.touched || eventForm.get('time')?.dirty)
+                  "
+                >
                   Time is required
                 </mat-error>
               </mat-form-field>
             </div>
 
+
             <div class="form-row">
+              <mat-checkbox formControlName="has_seats" (change)="onSeatModeChange($event)">
+                Enable Seat-wise Booking
+              </mat-checkbox>
+            </div>
+
+            <div class="form-row" *ngIf="eventForm.get('has_seats')?.value">
               <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Number of Rows</mat-label>
+                <input matInput type="number" formControlName="seat_rows" min="1" max="26">
+                <mat-hint>Maximum 26 rows (A-Z)</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Seats per Row</mat-label>
+                <input matInput type="number" formControlName="seat_cols" min="1" max="50">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row" *ngIf="eventForm.get('has_seats')?.value">
+              <div class="capacity-info">
+                <strong>Total Capacity: {{ calculateTotalCapacity() }}</strong>
+                <small>This will override the manual capacity setting</small>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width" *ngIf="!eventForm.get('has_seats')?.value">
                 <mat-label>Capacity</mat-label>
                 <input matInput type="number" formControlName="capacity" min="1" required>
                 <mat-error *ngIf="eventForm.get('capacity')?.hasError('required')">
@@ -109,7 +143,7 @@ import { Event } from '../../models/interfaces';
                 </mat-error>
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="half-width">
+              <mat-form-field appearance="outline" [class]="eventForm.get('has_seats')?.value ? 'full-width' : 'half-width'">
                 <mat-label>Ticket Price ($)</mat-label>
                 <input matInput type="number" formControlName="ticket_price" min="0" step="0.01">
               </mat-form-field>
@@ -160,6 +194,17 @@ import { Event } from '../../models/interfaces';
       justify-content: flex-end;
       margin-top: 24px;
     }
+    .capacity-info {
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      width: 100%;
+    }
+    .capacity-info small {
+      display: block;
+      color: #666;
+      margin-top: 4px;
+    }
     @media (max-width: 600px) {
       .form-row {
         flex-direction: column;
@@ -192,7 +237,10 @@ export class EventFormComponent implements OnInit {
       time: ['', Validators.required],
       capacity: ['', [Validators.required, Validators.min(1)]],
       ticket_price: [0, [Validators.min(0)]],
-      image_url: ['']
+      image_url: [''],
+      has_seats: [false],
+      seat_rows: [null],
+      seat_cols: [null]
     });
   }
 
@@ -220,7 +268,10 @@ export class EventFormComponent implements OnInit {
             time: eventDate.toTimeString().slice(0, 5),
             capacity: event.capacity,
             ticket_price: event.ticket_price,
-            image_url: event.image_url
+            image_url: event.image_url,
+            has_seats: event.has_seats || false,
+            seat_rows: event.seat_rows,
+            seat_cols: event.seat_cols
           });
         },
         error: (error) => {
@@ -238,8 +289,16 @@ export class EventFormComponent implements OnInit {
       
       // Combine date and time
       const eventDateTime = new Date(formValue.date);
-      const [hours, minutes] = formValue.time.split(':');
-      eventDateTime.setHours(parseInt(hours), parseInt(minutes));
+      const timeValue = formValue.time;
+      
+      if (timeValue && timeValue.includes(':')) {
+        const [hours, minutes] = timeValue.split(':');
+        eventDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      } else {
+        // Default to current time if time is invalid
+        const now = new Date();
+        eventDateTime.setHours(now.getHours(), now.getMinutes(), 0, 0);
+      }
 
       const eventData = {
         name: formValue.name,
@@ -247,9 +306,12 @@ export class EventFormComponent implements OnInit {
         venue: formValue.venue,
         category: formValue.category,
         date_time: eventDateTime.toISOString(),
-        capacity: formValue.capacity,
+        capacity: formValue.has_seats ? (formValue.seat_rows * formValue.seat_cols) : formValue.capacity,
         ticket_price: formValue.ticket_price,
-        image_url: formValue.image_url
+        image_url: formValue.image_url,
+        has_seats: formValue.has_seats,
+        seat_rows: formValue.has_seats ? formValue.seat_rows : null,
+        seat_cols: formValue.has_seats ? formValue.seat_cols : null
       };
 
       const operation = this.isEditMode 
@@ -273,5 +335,27 @@ export class EventFormComponent implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/organizer/dashboard']);
+  }
+
+  onSeatModeChange(event: any): void {
+    const hasSeats = event.checked;
+    if (hasSeats) {
+      this.eventForm.get('seat_rows')?.setValidators([Validators.required, Validators.min(1), Validators.max(26)]);
+      this.eventForm.get('seat_cols')?.setValidators([Validators.required, Validators.min(1), Validators.max(50)]);
+      this.eventForm.get('capacity')?.clearValidators();
+    } else {
+      this.eventForm.get('seat_rows')?.clearValidators();
+      this.eventForm.get('seat_cols')?.clearValidators();
+      this.eventForm.get('capacity')?.setValidators([Validators.required, Validators.min(1)]);
+    }
+    this.eventForm.get('seat_rows')?.updateValueAndValidity();
+    this.eventForm.get('seat_cols')?.updateValueAndValidity();
+    this.eventForm.get('capacity')?.updateValueAndValidity();
+  }
+
+  calculateTotalCapacity(): number {
+    const rows = this.eventForm.get('seat_rows')?.value || 0;
+    const cols = this.eventForm.get('seat_cols')?.value || 0;
+    return rows * cols;
   }
 }

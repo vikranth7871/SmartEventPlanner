@@ -13,15 +13,19 @@ export interface Event {
   image_url?: string;
   created_at?: Date;
   available_tickets?: number;
+  seat_rows?: number;
+  seat_cols?: number;
+  has_seats?: boolean;
 }
 
 export class EventModel {
   static async create(event: Omit<Event, 'id' | 'created_at'>): Promise<number> {
     const [result] = await pool.execute(
-      `INSERT INTO events (organizer_id, name, description, venue, date_time, category, capacity, ticket_price, image_url) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO events (organizer_id, name, description, venue, date_time, category, capacity, ticket_price, image_url, seat_rows, seat_cols, has_seats) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [event.organizer_id, event.name, event.description, event.venue, event.date_time, 
-       event.category, event.capacity, event.ticket_price || 0, event.image_url]
+       event.category, event.capacity, event.ticket_price || 0, event.image_url,
+       event.seat_rows, event.seat_cols, event.has_seats || false]
     );
     return (result as any).insertId;
   }
